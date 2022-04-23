@@ -8,6 +8,7 @@ import {
 } from '@solana/web3.js';
 import type {NextApiRequest, NextApiResponse} from 'next';
 import {getNodeURL} from '@figment-solana/lib';
+import {has} from 'lodash';
 
 export default async function setter(
   req: NextApiRequest,
@@ -26,13 +27,21 @@ export default async function setter(
 
     // this your turn to figure out
     // how to create this instruction
-    const instruction = new TransactionInstruction(undefined);
+    const instruction = new TransactionInstruction({
+      keys: [{pubkey: greeterPublicKey, isSigner: false, isWritable: true}],
+      programId: programKey,
+      data: Buffer.alloc(0),
+    });
 
     // this your turn to figure out
     // how to create this transaction
-    const hash = await sendAndConfirmTransaction(undefined);
+    const hash = await sendAndConfirmTransaction(
+      connection,
+      new Transaction().add(instruction),
+      [payerKeypair],
+    );
 
-    res.status(200).json(undefined);
+    res.status(200).json(hash);
   } catch (error) {
     console.error(error);
     res.status(500).json('Get balance failed');
